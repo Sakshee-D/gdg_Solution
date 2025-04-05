@@ -1,36 +1,46 @@
+'use client'
+
 import { useEffect, useState } from "react";
 import supabase from "../utils/supabase";
 
 export default function Home() {
-  const [emissions, setEmissions] = useState([]);
-  const [company, setCompany] = useState("");
-  const [emission, setEmission] = useState("");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
-    fetchEmissions();
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      setUser(user);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+      }
+    );
+
+    return () => listener.subscription.unsubscribe();
   }, []);
 
-  const fetchEmissions = async () => {
-    let { data } = await supabase.from("carbon_emissions").select("*");
-    setEmissions(data);
+  const signInWithGoogle = async () => {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+    });
   };
 
-  const addEmission = async () => {
-    await supabase.from("carbon_emissions").insert([{ company_name: company, emission_value: emission }]);
-    fetchEmissions(); // Refresh Data
+  const signOut = async () => {
+    await supabase.auth.signOut();
   };
 
   return (
     <div>
-      <h1>Carbon Tracker</h1>
-      <input placeholder="Company Name" onChange={(e) => setCompany(e.target.value)} />
-      <input placeholder="Emission (CO2)" onChange={(e) => setEmission(e.target.value)} />
-      <button onClick={addEmission}>Submit</button>
-      <ul>
-        {emissions.map((e) => (
-          <li key={e.id}>{e.company_name}: {e.emission_value} CO2</li>
-        ))}
-      </ul>
+      <h1>Welcome to Carbon Tracker</h1>
+      {user ? (
+        <>
+          <p>Logged in as: {user.email}</p>
+          <button onClick={signOut}>Sign Out</button>
+        </>
+      ) : (
+        <button onClick={signInWithGoogle}>Login with Google</button>
+      )}
     </div>
   );
 }
