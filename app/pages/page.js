@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import supabase from "../../utils/supabase";
 import { useRouter } from "next/navigation";
+import EmissionDashboard from "../EmissonDashboard"; // 🆕 Import the dashboard
 
 export default function Home() {
   const [emissions, setEmissions] = useState([]);
@@ -29,18 +30,15 @@ export default function Home() {
       return;
     }
 
-    await supabase.from("carbon_emissions").insert([
-      {
-        company_name: company,
-        emission_value: emission,
-        emission_date: emissionDate,
-        source,
-        fuel_type: fuelType,
-        category,
-      },
-    ]);
+    await supabase.from("carbon_emissions").insert([{
+      company_name: company,
+      emission_value: emission,
+      emission_date: emissionDate,
+      source,
+      fuel_type: fuelType,
+      category,
+    }]);
 
-    // Reset fields
     setCompany("");
     setEmission("");
     setEmissionDate("");
@@ -68,7 +66,7 @@ export default function Home() {
         color: "#333",
       }}
     >
-      {/* Sign Out Button in Top-Right Corner */}
+      {/* Sign Out Button */}
       <button
         onClick={signOut}
         style={{
@@ -87,7 +85,7 @@ export default function Home() {
         Sign Out
       </button>
 
-      {/* Main Content Box */}
+      {/* Input Form */}
       <div
         style={{
           backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -165,6 +163,9 @@ export default function Home() {
           ))}
         </ul>
       </div>
+
+      {/* Emission Dashboard Below the Form */}
+      <EmissionDashboard />
     </div>
   );
 }
