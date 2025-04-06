@@ -7,7 +7,7 @@ import EmissionDashboard from "../EmissonDashboard";
 
 export default function Home() {
   const [emissions, setEmissions] = useState([]);
-  const [company, setCompany] = useState("");  
+  const [company, setCompany] = useState("");
   const [emissionDate, setEmissionDate] = useState("");
   const [entries, setEntries] = useState({
     Electricity: { emission: "", fuelType: "", category: "" },
@@ -28,7 +28,7 @@ export default function Home() {
       }
     }
   };
-  
+
 
   const addEmission = async () => {
     if (!company || !emissionDate) {
@@ -80,6 +80,18 @@ export default function Home() {
         color: "#333",
       }}
     >
+      <div
+        style={{
+          position: "fixed",
+          top: "20px",
+          right: "130px", /* Adjusted to make space for the text */
+          zIndex: 1000,
+          color: "#555",
+          fontSize: "0.9rem",
+        }}
+      >
+        Wait for 2 mins
+      </div>
       <button
         onClick={signOut}
         style={{
@@ -204,20 +216,20 @@ export default function Home() {
         </button>
 
         <button
-  onClick={() => router.push("/suggestions")}
-  style={{
-    backgroundColor: "#2980b9",
-    color: "white",
-    padding: "10px 20px",
-    borderRadius: "6px",
-    marginTop: "20px",
-    width: "100%",
-    fontWeight: "bold",
-    cursor: "pointer",
-  }}
->
-  View Emission Suggestions
-</button>
+          onClick={() => router.push("/suggestions")}
+          style={{
+            backgroundColor: "#2980b9",
+            color: "white",
+            padding: "10px 20px",
+            borderRadius: "6px",
+            marginTop: "20px",
+            width: "100%",
+            fontWeight: "bold",
+            cursor: "pointer",
+          }}
+        >
+          View Emission Suggestions
+        </button>
 
 
         <ul style={{ marginTop: "2rem", paddingLeft: "1rem" }}>
@@ -234,8 +246,6 @@ export default function Home() {
     </div>
   );
 }
-
-
 
 const inputStyle = {
   width: "100%",

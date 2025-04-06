@@ -4,16 +4,19 @@ import { useEffect, useState } from "react";
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid, Legend } from "recharts";
 import supabase from "../utils/supabase";
 import dayjs from "dayjs";
+import { useRouter } from 'next/navigation'; // Import useRouter
 
-const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042", "#FF6384", "#AA00FF"];
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28"]; // Define colors for Electricity, Transport, Manufacturing
 
 export default function EmissionDashboard() {
   const [emissions, setEmissions] = useState([]);
   const [monthlyData, setMonthlyData] = useState([]);
   const [categoryData, setCategoryData] = useState([]);
   const [companyData, setCompanyData] = useState([]);
+  const [sourceData, setSourceData] = useState([]); // New state for source data
   const [totalMonth, setTotalMonth] = useState(0);
   const [totalYear, setTotalYear] = useState(0);
+  const router = useRouter(); // Initialize useRouter
 
   useEffect(() => {
     fetchEmissions();
@@ -35,6 +38,7 @@ export default function EmissionDashboard() {
     const byMonth = {};
     const byCategory = {};
     const byCompany = {};
+    const bySource = {}; // Object to store emissions by source
 
     data.forEach((entry) => {
       const date = dayjs(entry.emission_date);
@@ -49,6 +53,9 @@ export default function EmissionDashboard() {
       // Company
       byCompany[entry.company_name] = (byCompany[entry.company_name] || 0) + Number(entry.emission_value);
 
+      // Source
+      bySource[entry.source] = (bySource[entry.source] || 0) + Number(entry.emission_value);
+
       // Totals
       if (date.year() === now.year()) {
         yearTotal += Number(entry.emission_value);
@@ -61,7 +68,7 @@ export default function EmissionDashboard() {
     setMonthlyData(Object.entries(byMonth).map(([month, emissions]) => ({ month, emissions })));
     setCategoryData(Object.entries(byCategory).map(([category, value]) => ({ category, value })));
     setCompanyData(Object.entries(byCompany).map(([company, value]) => ({ company, value })));
-
+    setSourceData(Object.entries(bySource).map(([source, value]) => ({ source, value }))); // Set source data
     setTotalMonth(monthTotal);
     setTotalYear(yearTotal);
   };
@@ -99,7 +106,7 @@ export default function EmissionDashboard() {
           label
         >
           {categoryData.map((_, index) => (
-            <Cell key={`cell-cat-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-cat-${index}`} fill={COLORS[(index + COLORS.length) % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip />
@@ -118,10 +125,31 @@ export default function EmissionDashboard() {
           label
         >
           {companyData.map((_, index) => (
-            <Cell key={`cell-comp-${index}`} fill={COLORS[index % COLORS.length]} />
+            <Cell key={`cell-comp-${index}`} fill={COLORS[(index + COLORS.length) % COLORS.length]} />
           ))}
         </Pie>
         <Tooltip />
+      </PieChart>
+
+      {/* New Pie Chart for Source Breakdown */}
+      <h3>🏭 Emissions by Source</h3>
+      <PieChart width={400} height={300}>
+        <Pie
+          data={sourceData}
+          dataKey="value"
+          nameKey="source"
+          cx="50%"
+          cy="50%"
+          outerRadius={100}
+          fill="#aaff80"
+          label
+        >
+          {sourceData.map((_, index) => (
+            <Cell key={`cell-source-${index}`} fill={COLORS[index % COLORS.length]} />
+          ))}
+        </Pie>
+        <Tooltip />
+        <Legend /> {/* Add a legend to identify Electricity, Transport, Manufacturing */}
       </PieChart>
 
       <table style={{ marginTop: "1rem", width: "100%", backgroundColor: "#fff", borderCollapse: "collapse" }}>
@@ -140,6 +168,22 @@ export default function EmissionDashboard() {
           ))}
         </tbody>
       </table>
+
+      {/* Add the "Go to Market" button here */}
+      <button
+        onClick={() => router.push('/market')}
+        style={{
+          marginTop: '2rem',
+          padding: '0.75rem 1.5rem',
+          backgroundColor: '#2ecc71',
+          color: 'white',
+          border: 'none',
+          borderRadius: '5px',
+          cursor: 'pointer',
+        }}
+      >
+        Go to Market
+      </button>
     </div>
   );
 }
